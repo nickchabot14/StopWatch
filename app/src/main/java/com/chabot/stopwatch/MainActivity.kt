@@ -16,6 +16,8 @@ var time = 0L
 class MainActivity : AppCompatActivity() {
     companion object{
         val TAG = "MainActivity"
+        val BUNDLE_DISPLAYED_TIME = "time"
+        val BUNDLE_IS_ON = "watchOn"
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +50,18 @@ class MainActivity : AppCompatActivity() {
             watchOn = !watchOn
         }
     }
+    fun updateDisplayedTime() {
+        if(watchOn) {
+            time = SystemClock.elapsedRealtime()-stopWatch.base
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        updateDisplayedTime()
+        outState.putLong(BUNDLE_DISPLAYED_TIME, time)
+        outState.putBoolean(BUNDLE_IS_ON, watchOn)
+    }
 
     override fun onStart() {
         super.onStart()
@@ -79,8 +93,15 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "OnDestroy: ")
     }
 
-    private fun startChronometer() {
-
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        watchOn = savedInstanceState.getBoolean(BUNDLE_IS_ON)
+        time = savedInstanceState.getLong(BUNDLE_DISPLAYED_TIME)
+        stopWatch.base = SystemClock.elapsedRealtime()- time
+        if(watchOn) {
+            stopWatch.start()
+            start.text = "stop"
+        }
     }
 
 
